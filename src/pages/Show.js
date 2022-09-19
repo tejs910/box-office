@@ -5,6 +5,7 @@ import Details from "../components/show/Details";
 import Seasons from "../components/show/Seasons";
 import ShowMainData from "../components/show/ShowMainData";
 import { apiGET } from "../misc/config";
+import { InfoBlock, ShowPageWrapper } from "./Show.styled";
 const reducer = (prevState, action) => {
   switch (action.type) {
     case "FETCH_SUCCESS": {
@@ -44,7 +45,6 @@ function Show() {
     apiGET(`shows/${id}?embed[]=seasons&embed[]=cast`)
       .then((results) => {
         if (isMounted) {
-          console.log("res is", results);
           dispatch({ type: "FETCH_SUCCESS", show: results });
           //   setShows(results);
           //   setIsLoading(false);
@@ -61,39 +61,38 @@ function Show() {
       isMounted = false;
     };
   }, [id]);
-  console.log("show", show);
   if (isLoading) return <div>Data is being loaded</div>;
   if (error) return <div>Error Occured : {error}</div>;
 
   return (
-    <div>
+    <ShowPageWrapper>
       <ShowMainData
         image={show.image}
         name={show.name}
         rating={show.rating}
-        sumarry={show.sumarry}
+        summary={show.summary}
         tags={show.genres}
       />
 
-      <div>
+      <InfoBlock>
         <h2>Details</h2>
         <Details
           status={show.status}
           network={show.network}
           premiered={show.premiered}
         />
-      </div>
+      </InfoBlock>
 
-      <div>
+      <InfoBlock>
         <h2>Seasons</h2>
         <Seasons seasons={show._embedded.seasons} />
-      </div>
+      </InfoBlock>
 
-      <div>
+      <InfoBlock>
         <h2>Casts</h2>
         <Cast cast={show._embedded.cast} />
-      </div>
-    </div>
+      </InfoBlock>
+    </ShowPageWrapper>
   );
 }
 
