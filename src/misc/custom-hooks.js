@@ -1,4 +1,5 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
+import { apiGET } from "./config";
 
 function showsReducer(prevState, action) {
   switch (action.type) {
@@ -25,4 +26,70 @@ function usePersistedReducer(reducer, initialState, key) {
 
 export default function useShows(key = "show") {
   return usePersistedReducer(showsReducer, [], key);
+}
+
+export function useLastQuery(key = "lastQuery") {
+  const [input, setInput] = useState(() => {
+    const persisted = sessionStorage.getItem(key);
+    return persisted ? JSON.parse(persisted) : "";
+  });
+  const setPersistedInput = (newState) => {
+    setInput(newState);
+    sessionStorage.setItem(key, JSON.stringify(newState));
+  };
+  return [input, setPersistedInput];
+}
+
+const reducer = (prevState, action) => {
+  switch (action.type) {
+    case "FETCH_SUCCESS": {
+      return {
+        isLoading: false,
+        show: action.show,
+        error: null,
+      };
+    }
+    case "FETCH_FAILED": {
+      return {
+        ...prevState,
+        isLoading: false,
+        error: action.error,
+      };
+    }
+    default:
+      return prevState;
+  }
+};
+
+export function useShow(showId) {
+  const [state, dispatch] = useReducer(reducer, {
+    show: null,
+    isLoading: true,
+    error: null,
+  });
+  //   const [shows, setShows] = useState(null);
+  //   const [isLoading, setIsLoading] = useState(true);
+  //   const [error, setError] = useState(null);
+  useEffect(() => {
+    let isMounted = true;
+    apiGET(`shows/${showId}?embed[]=seasons&embed[]=cast`)
+      .then((results) => {
+        if (isMounted) {
+          dispatch({ type: "FETCH_SUCCESS", show: results });
+          //   setShows(results);
+          //   setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          dispatch({ type: "FETCH_FAILED", error: err.message });
+          //   setError(err.message);
+          //   setIsLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [showId]);
+  return state;
 }
