@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import ActorGrid from "../components/actor/ActorGrid";
+import CustomRadio from "../components/CustomRadio";
 import MainPageLayout from "../components/MainPageLayout";
 import ShowGrid from "../components/show/ShowGrid";
 import { apiGET } from "../misc/config";
 import { useLastQuery } from "../misc/custom-hooks";
+import {
+  RadioInputsWrapper,
+  SearchButtonWrapper,
+  SearchInput,
+} from "./Home.styled";
 function Home() {
   const [input, setInput] = useLastQuery();
   const [results, setResults] = useState(null);
@@ -40,38 +46,38 @@ function Home() {
   };
   return (
     <MainPageLayout>
-      <input
+      <SearchInput
         onKeyDown={onKeyDown}
         onChange={onInputChange}
         placeholder="search for something"
         type="text"
         value={input}
       />
-      <div>
-        <label htmlFor="shows-search">
-          Shows
-          <input
+      <RadioInputsWrapper>
+        <div>
+          <CustomRadio
+            label="Shows"
             id="shows-search"
             name="typeSearch"
-            type="radio"
             value="shows"
             onChange={onRadioChange}
           />
-          <label htmlFor="actors-search">
-            Actors
-            <input
-              id="actors-search"
-              name="typeSearch"
-              type="radio"
-              value="people"
-              onChange={onRadioChange}
-            />
-          </label>
-        </label>
-      </div>
-      <button type="button" onClick={onSearch}>
-        Search
-      </button>
+        </div>
+        <div>
+          <CustomRadio
+            label="actors"
+            id="actors-search"
+            name="typeSearch"
+            value="people"
+            onChange={onRadioChange}
+          />
+        </div>
+      </RadioInputsWrapper>
+      <SearchButtonWrapper>
+        <button type="button" onClick={onSearch}>
+          Search
+        </button>
+      </SearchButtonWrapper>
       {renderResult()}
     </MainPageLayout>
   );
